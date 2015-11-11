@@ -1,10 +1,12 @@
 package me.pedometer.model;
 
+import java.io.Serializable;
+
 /**
  * Created by liudan on 15/11/10.
  */
 
-public class CalorieInfo {
+public class CalorieInfo implements Serializable{
 
     //ID
     private int id;

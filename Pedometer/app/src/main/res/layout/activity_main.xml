@@ -2,22 +2,31 @@
               xmlns:tools="http://schemas.android.com/tools"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
-              android:orientation="horizontal"
+              android:orientation="vertical"
               android:gravity="center"
               tools:context=".MainActivity">
 
     <TextView
-            android:text="@string/step_count"
-            android:textSize="19sp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-    <TextView
             android:id="@+id/activity_main_step_tv"
             android:textSize="19sp"
-            android:ems="4"
             android:text="0"
-            android:layout_marginLeft="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
+
+    <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:onClick="onStartClick"
+            android:text="start"
+    />
+
+    <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="onStopClick"
+            android:text="stop"
+    />
+
 
 </LinearLayout>

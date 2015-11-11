@@ -3,6 +3,7 @@ package me.pedometer;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
+import android.support.annotation.Nullable;
 import me.pedometer.model.CalorieInfo;
 
 /**
@@ -50,7 +51,7 @@ public class SensorChangeListener implements SensorEventListener {
         this.mCalorieInfo = calorieInfo;
     }
 
-    public void setStepListener(StepListener stepListener) {
+    public void setStepListener(@Nullable  StepListener stepListener) {
         this.mStepListeners = stepListener;
     }
 
@@ -94,7 +95,9 @@ public class SensorChangeListener implements SensorEventListener {
 					 * */
                     int frequency = mCalorieInfo.getFrequency();
                     mCalorieInfo.setFrequency(++frequency);
-                    mStepListeners.onStep(mCalorieInfo);
+                    if(null != mStepListeners){
+                        mStepListeners.onStep(mCalorieInfo);
+                    }
                 }
                 if (timeOfNow - timeOfLastPeak >= 250
                         && (peakOfWave - valleyOfWave >= initialValue)) {

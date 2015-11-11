@@ -1,17 +1,23 @@
 package me.pedometer.app;
 
 import android.app.Activity;
-import android.hardware.Sensor;
-import android.hardware.SensorManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
 import android.widget.TextView;
-import me.pedometer.SensorChangeListener;
+import me.pedometer.app.service.PedometerService;
 import me.pedometer.model.CalorieInfo;
-import me.pedometer.StepListener;
 
-public class MainActivity extends Activity implements StepListener {
+public class MainActivity extends Activity {
 
+    private static final String TAG = MainActivity.class.getSimpleName();
     private TextView stepTv;
+
+    private int count;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,16 +25,34 @@ public class MainActivity extends Activity implements StepListener {
         setContentView(R.layout.activity_main);
         stepTv = (TextView) findViewById(R.id.activity_main_step_tv);
 
-        SensorManager mSensorMgr = (SensorManager) this.getSystemService(android.content.Context.SENSOR_SERVICE);
-        Sensor sensor = mSensorMgr.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        SensorChangeListener sensorChangeListener = new SensorChangeListener(new CalorieInfo());
-        //此方法用来注册，只有注册过才会生效，参数：SensorEventListener的实例，Sensor的实例，更新速率
-        mSensorMgr.registerListener(sensorChangeListener, sensor, SensorManager.SENSOR_DELAY_FASTEST);
-        sensorChangeListener.setStepListener(this);
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(PedometerService.ACTION_PEDOMETER);
+
+        registerReceiver(broadcastReceiver, filter);
+
+    }
+
+    BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            CalorieInfo calorieInfo = (CalorieInfo) intent.getSerializableExtra("data");
+            Log.d(TAG, "[Activity]calorieInfo: " + calorieInfo);
+            stepTv.setText(String.valueOf(count++));
+        }
+    };
+
+    public void onStartClick(View view) {
+        count = 0;
+        startService(new Intent(this, PedometerService.class));
+    }
+
+    public void onStopClick(View view) {
+        stopService(new Intent(this, PedometerService.class));
     }
 
     @Override
-    public void onStep(CalorieInfo calorieInfo) {
-        stepTv.setText(String.valueOf(calorieInfo.getFrequency()));
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(broadcastReceiver);
     }
 }
