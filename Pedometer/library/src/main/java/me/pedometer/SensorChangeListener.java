@@ -1,14 +1,14 @@
-package me.pedometer.app;
+package me.pedometer;
 
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
-import me.pedometer.app.model.CalorieInfo;
+import me.pedometer.model.CalorieInfo;
 
 /**
  * Created by liudan on 15/11/10.
  */
-public class SensorListener implements SensorEventListener {
+public class SensorChangeListener implements SensorEventListener {
 
     //存放三轴数据
     float[] oriValues = new float[3];
@@ -46,7 +46,7 @@ public class SensorListener implements SensorEventListener {
 
 
     private CalorieInfo mCalorieInfo;
-    public SensorListener(CalorieInfo calorieInfo) {
+    public SensorChangeListener(CalorieInfo calorieInfo) {
         this.mCalorieInfo = calorieInfo;
     }
 

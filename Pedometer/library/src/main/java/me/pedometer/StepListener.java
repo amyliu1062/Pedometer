@@ -1,6 +1,6 @@
-package me.pedometer.app;
+package me.pedometer;
 
-import me.pedometer.app.model.CalorieInfo;
+import me.pedometer.model.CalorieInfo;
 
 /**
  * Created by liudan on 15/11/10.

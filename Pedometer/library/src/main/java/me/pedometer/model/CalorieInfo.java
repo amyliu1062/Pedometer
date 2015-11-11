@@ -1,4 +1,4 @@
-package me.pedometer.app.model;
+package me.pedometer.model;
 
 /**
  * Created by liudan on 15/11/10.
