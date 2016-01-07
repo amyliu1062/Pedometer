@@ -18,8 +18,9 @@
         </activity>
 
         <!-- Pedometer service -->
-        <service android:name=".service.PedometerService"/>
+        <!--<service android:name=".service.PedometerService"/>-->
 
+        <service android:name=".service.StepCounterService"/>
     </application>
 
 </manifest>

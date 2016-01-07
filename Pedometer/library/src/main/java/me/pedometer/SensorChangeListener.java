@@ -4,6 +4,10 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.support.annotation.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import me.pedometer.model.CalorieInfo;
 
 /**
@@ -12,46 +16,48 @@ import me.pedometer.model.CalorieInfo;
 public class SensorChangeListener implements SensorEventListener {
 
     //存放三轴数据
-    float[] oriValues = new float[3];
-    final int valueNum = 4;
+    private float[] oriValues = new float[3];
+    private final int valueNum = 4;
     //用于存放计算阈值的波峰波谷差值
-    float[] tempValue = new float[valueNum];
-    int tempCount = 0;
+    private float[] tempValue = new float[valueNum];
+    private int tempCount = 0;
     //是否上升的标志位
-    boolean isDirectionUp = false;
+    private boolean isDirectionUp = false;
     //持续上升次数
-    int continueUpCount = 0;
+    private int continueUpCount = 0;
     //上一点的持续上升的次数，为了记录波峰的上升次数
-    int continueUpFormerCount = 0;
+    private int continueUpFormerCount = 0;
     //上一点的状态，上升还是下降
-    boolean lastStatus = false;
+    private boolean lastStatus = false;
     //波峰值
-    float peakOfWave = 0;
+    private float peakOfWave = 0;
     //波谷值
-    float valleyOfWave = 0;
+    private float valleyOfWave = 0;
     //此次波峰的时间
-    long timeOfThisPeak = 0;
+    private long timeOfThisPeak = 0;
     //上次波峰的时间
-    long timeOfLastPeak = 0;
+    private long timeOfLastPeak = 0;
     //当前的时间
-    long timeOfNow = 0;
+    private long timeOfNow = 0;
     //当前传感器的值
-    float gravityNew = 0;
+    private float gravityNew = 0;
     //上次传感器的值
-    float gravityOld = 0;
+    private float gravityOld = 0;
     //动态阈值需要动态的数据，这个值用于这些动态数据的阈值
-    final float initialValue = (float) 1.3;
+    private final float initialValue = (float) 1.3;
     //初始阈值
-    float ThreadValue = (float) 2.0;
+    private float ThreadValue = (float) 8.0;
     private StepListener mStepListeners;
 
+    private ArrayList stepList = new ArrayList();
 
     private CalorieInfo mCalorieInfo;
+
     public SensorChangeListener(CalorieInfo calorieInfo) {
         this.mCalorieInfo = calorieInfo;
     }
 
-    public void setStepListener(@Nullable  StepListener stepListener) {
+    public void setStepListener(@Nullable StepListener stepListener) {
         this.mStepListeners = stepListener;
     }
 
@@ -86,27 +92,41 @@ public class SensorChangeListener implements SensorEventListener {
                 if (timeOfNow - timeOfLastPeak >= 250
                         && (peakOfWave - valleyOfWave >= ThreadValue)) {
                     timeOfThisPeak = timeOfNow;
-                    /*
-					 * 更新界面的处理，不涉及到算法
-					 * 一般在通知更新界面之前，增加下面处理，为了处理无效运动：
-					 * 1.连续记录10才开始计步
-					 * 2.例如记录的9步用户停住超过3秒，则前面的记录失效，下次从头开始
-					 * 3.连续记录了9步用户还在运动，之前的数据才有效
-					 * */
-                    int frequency = mCalorieInfo.getFrequency();
-                    mCalorieInfo.setFrequency(++frequency);
-                    if(null != mStepListeners){
-                        mStepListeners.onStep(mCalorieInfo);
+                    if (DetectorEffectCalculate()) {
+                        // 记录数据
+                        int frequency = mCalorieInfo.getFrequency();
+                        mCalorieInfo.setFrequency(++frequency);
+                        if (null != mStepListeners) {
+                            mStepListeners.onStep(mCalorieInfo);
+                        }
                     }
                 }
-                if (timeOfNow - timeOfLastPeak >= 250
-                        && (peakOfWave - valleyOfWave >= initialValue)) {
-                    timeOfThisPeak = timeOfNow;
-                    ThreadValue = Peak_Valley_Thread(peakOfWave - valleyOfWave);
-                }
+//                if (timeOfNow - timeOfLastPeak >= 250
+//                        && (peakOfWave - valleyOfWave >= initialValue)) {
+//                    timeOfThisPeak = timeOfNow;
+//                    ThreadValue = Peak_Valley_Thread(peakOfWave - valleyOfWave);
+//                }
             }
         }
         gravityOld = values;
+    }
+
+    /*
+     * 更新界面的处理，不涉及到算法
+     * 一般在通知更新界面之前，增加下面处理，为了处理无效运动：
+     * 1.连续记录10才开始计步
+     * 2.例如记录的9步用户停住超过3秒，则前面的记录失效，下次从头开始
+     * 3.连续记录了9步用户还在运动，之前的数据才有效
+     * */
+    private boolean DetectorEffectCalculate() {
+        boolean isEffect = false;
+        if (timeOfThisPeak - timeOfLastPeak < 2000) {
+            stepList.add(timeOfThisPeak);
+            isEffect = stepList.size() >= 10;
+        } else {
+            stepList.clear();
+        }
+        return isEffect;
     }
 
     /*
